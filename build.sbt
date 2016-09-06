@@ -50,7 +50,7 @@ val nexusRepositoryPath = System.getenv("NEXUS_REPOSITORY_PATH")
 val nexusUsername = System.getenv("NEXUS_USERNAME")
 val nexusPassword = System.getenv("NEXUS_PASSWORD")
 
-credentials := Seq(Credentials("Sonatype Nexus", nexusUrl, nexusUsername, nexusPassword))
+credentials := Seq(Credentials("Sonatype Nexus @ sap-posco-admin.codecentric.de", nexusUrl, nexusUsername, nexusPassword))
 
 
 publishArtifact in Test := false

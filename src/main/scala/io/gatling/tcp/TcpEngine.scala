@@ -17,7 +17,9 @@ import org.jboss.netty.handler.codec.frame.{FrameDecoder, DelimiterBasedFrameDec
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.jboss.netty.handler.codec.protobuf.{ProtobufVarint32LengthFieldPrepender, ProtobufVarint32FrameDecoder}
 import org.jboss.netty.handler.codec.string.{ StringEncoder, StringDecoder }
+import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.jboss.netty.util.{ CharsetUtil, HashedWheelTimer }
+import java.nio.ByteBuffer
 
 import scala.concurrent.{Future, Promise}
 import scala.util.Try
@@ -77,6 +79,11 @@ class TcpEngine {
   val stringDecoder: StringDecoder = new StringDecoder(CharsetUtil.UTF_8)
 
   val encoder: StringEncoder = new StringEncoder(CharsetUtil.UTF_8)
+  var bytesEncoder = new OneToOneEncoder()  {
+    override def encode(ctx: ChannelHandlerContext, channel: Channel, msg: Object): Object = {
+      ChannelBuffers.wrappedBuffer(ByteBuffer.wrap(msg.asInstanceOf[Array[Byte]]))
+    }
+  }
 
   def tcpClient(session: Session, protocol: TcpProtocol, listener: MessageListener) : Future[Session] = {
     val bootstrap = new ClientBootstrap(socketChannelFactory)
@@ -85,10 +92,11 @@ class TcpEngine {
         val pipeline = Channels.pipeline()
         val framer = resolveFramer(protocol)
         val prepender = resolvePrepender(protocol)
-        pipeline.addLast("framer", framer)
-        pipeline.addLast("prepender", prepender)
+        //pipeline.addLast("framer", framer)
+        //pipeline.addLast("prepender", prepender)
         pipeline.addLast("decoder", stringDecoder)
-        pipeline.addLast("encoder", encoder)
+        //pipeline.addLast("encoder", encoder)
+        pipeline.addLast("encoder", bytesEncoder)
         pipeline.addLast("listener", listener)
         pipeline
       }

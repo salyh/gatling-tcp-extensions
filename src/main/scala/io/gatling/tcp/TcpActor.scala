@@ -56,14 +56,16 @@ class TcpActor(dataWriterClient : DataWriterClient) extends BaseActor {
         val now = nowMillis
         message match {
           case TextTcpMessage(text) => channel.write(text)
+          case ByteTcpMessage(bytes) => channel.write(bytes)
           case _                    => logger.warn("Only text messages supported")
         }
-        check match {
+       /* check match {
           case Some(c) =>
             // do this immediately instead of self sending a Listen message so that other messages don't get a chance to be handled before
             setCheck(tx, channel, requestName, c, next, session)
           case None => next ! session
-        }
+        }*/
+        next ! session
 
         logRequest(session, requestName, OK, now, now)
       case OnTextMessage(message, time) =>
